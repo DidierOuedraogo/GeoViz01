@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoData Explorer - Analyse de Données Géologiques</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .upload-section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .file-input-group {
+            margin-bottom: 15px;
+        }
+        .file-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        .file-input {
+            position: relative;
+        }
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            background-color: #fff;
+            font-family: inherit;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .btn i {
+            margin-right: 8px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #2ecc71;
+        }
+        .btn-secondary:hover {
+            background-color: #27ae60;
+        }
+        .btn-tertiary {
+            background-color: #9b59b6;
+        }
+        .btn-tertiary:hover {
+            background-color: #8e44ad;
+        }
+        .btn-quaternary {
+            background-color: #e74c3c;
+        }
+        .btn-quaternary:hover {
+            background-color: #c0392b;
+        }
+        .data-preview {
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+        .tab:hover {
+            background-color: #e9ecef;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            overflow-x: auto;
+            background-color: #fff;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+            color: #34495e;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .error:before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 10px;
+        }
+        .success {
+            color: #27ae60;
+            padding: 10px;
+            background-color: #d4efdf;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .success:before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 10px;
+        }
+        .stats-section, .visualization-section, .threeD-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            padding: 10px;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        select, input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+            max-width: 300px;
+            font-family: inherit;
+        }
+        .option-group {
+            margin-bottom: 15px;
+        }
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        .color-option.selected {
+            border-color: #000;
+        }
+        #canvas3d-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+        }
+        .controls3d {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 10;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .controls3d button {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .controls3d button:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+        .legend3d {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 4px;
+            z-index: 10;
+            max-width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-title i {
+            margin-right: 10px;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+        @media (max-width: 768px) {
+            .stats-grid, .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .tab {
+                margin-bottom: 5px;
+                border-radius: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+            #canvas3d-container {
+                height: 350px;
+            }
+            .controls3d {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-layer-group"></i> GeoData Explorer - Analyse de Données Géologiques</h1>
+        
+        <div class="upload-section">
+            <div class="section-title">
+                <i class="fas fa-file-upload"></i>
+                <h2>Importer des fichiers CSV</h2>
+            </div>
+            
+            <div class="file-input-group">
+                <label for="collets"><i class="fas fa-circle-dot"></i> Collets de forages:</label>
+                <div class="file-input">
+                    <input type="file" id="collets" accept=".csv">
+                </div>
+            </div>
+            
+            <div class="file-input-group">
+                <label for="deviations"><i class="fas fa-route"></i> Déviations:</label>
+                <div class="file-input">
+                    <input type="file" id="deviations" accept=".csv">
+                </div>
+            </div>
+            
+            <div class="file-input-group">
+                <label for="analyses"><i class="fas fa-flask"></i> Analyses:</label>
+                <div class="file-input">
+                    <input type="file" id="analyses" accept=".csv">
+                </div>
+            </div>
+            
+            <div class="file-input-group">
+                <label for="lithologie"><i class="fas fa-mountain"></i> Lithologie:</label>
+                <div class="file-input">
+                    <input type="file" id="lithologie" accept=".csv">
+                </div>
+            </div>
+            
+            <div>
+                <button id="import-btn" class="btn"><i class="fas fa-upload"></i> Importer les données</button>
+                <button id="stats-btn" class="btn btn-secondary"><i class="fas fa-chart-bar"></i> Statistiques</button>
+                <button id="visual-btn" class="btn btn-tertiary"><i class="fas fa-chart-pie"></i> Visualisation</button>
+                <button id="threeD-btn" class="btn btn-quaternary"><i class="fas fa-cube"></i> Visualisation 3D</button>
+            </div>
+            <div id="message"></div>
+        </div>
+        
+        <div class="data-preview">
+            <div class="section-title">
+                <i class="fas fa-table"></i>
+                <h2>Aperçu des données</h2>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="collets-tab"><i class="fas fa-circle-dot"></i> Collets</div>
+                <div class="tab" data-tab="deviations-tab"><i class="fas fa-route"></i> Déviations</div>
+                <div class="tab" data-tab="analyses-tab"><i class="fas fa-flask"></i> Analyses</div>
+                <div class="tab" data-tab="lithologie-tab"><i class="fas fa-mountain"></i> Lithologie</div>
+                <div class="tab" data-tab="stats-tab"><i class="fas fa-chart-bar"></i> Statistiques</div>
+                <div class="tab" data-tab="visualization-tab"><i class="fas fa-chart-pie"></i> Visualisation</div>
+                <div class="tab" data-tab="threeD-tab"><i class="fas fa-cube"></i> Visualisation 3D</div>
+            </div>
+            
+            <div id="collets-tab" class="tab-content active">
+                <div id="collets-data">Aucune donnée disponible</div>
+            </div>
+            
+            <div id="deviations-tab" class="tab-content">
+                <div id="deviations-data">Aucune donnée disponible</div>
+            </div>
+            
+            <div id="analyses-tab" class="tab-content">
+                <div id="analyses-data">Aucune donnée disponible</div>
+            </div>
+            
+            <div id="lithologie-tab" class="tab-content">
+                <div id="lithologie-data">Aucune donnée disponible</div>
+            </div>
+            
+            <div id="stats-tab" class="tab-content">
+                <div class="stats-section">
+                    <div class="section-title">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Analyse Statistique des Données</h3>
+                    </div>
+                    
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="data-source-stats"><i class="fas fa-database"></i> Source de données:</label>
+                            <select id="data-source-stats">
+                                <option value="">Sélectionnez une source</option>
+                                <option value="collets">Collets de forages</option>
+                                <option value="deviations">Déviations</option>
+                                <option value="analyses">Analyses</option>
+                                <option value="lithologie">Lithologie</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group" id="column-selector-stats-container" style="display:none;">
+                            <label for="column-selector-stats"><i class="fas fa-columns"></i> Colonne à analyser:</label>
+                            <select id="column-selector-stats"></select>
+                        </div>
+                        
+                        <div class="option-group" id="stat-type-container" style="display:none;">
+                            <label for="stat-type"><i class="fas fa-chart-line"></i> Type d'analyse:</label>
+                            <select id="stat-type">
+                                <option value="summary">Résumé statistique</option>
+                                <option value="histogram">Histogramme</option>
+                                <option value="boxplot">Diagramme en boîte</option>
+                                <option value="distribution">Distribution</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button id="generate-stats" class="btn" style="display:none;"><i class="fas fa-cogs"></i> Générer l'analyse</button>
+                    
+                    <div id="stats-summary" class="stats-grid"></div>
+                    <div id="stats-chart-container" class="chart-container" style="display:none;"></div>
+                </div>
+            </div>
+            
+            <div id="visualization-tab" class="tab-content">
+                <div class="visualization-section">
+                    <div class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Visualisation des Données</h3>
+                    </div>
+                    
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="data-source-visual"><i class="fas fa-database"></i> Source de données:</label>
+                            <select id="data-source-visual">
+                                <option value="">Sélectionnez une source</option>
+                                <option value="collets">Collets de forages</option>
+                                <option value="deviations">Déviations</option>
+                                <option value="analyses">Analyses</option>
+                                <option value="lithologie">Lithologie</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group" id="visual-type-container" style="display:none;">
+                            <label for="visual-type"><i class="fas fa-chart-line"></i> Type de visualisation:</label>
+                            <select id="visual-type">
+                                <option value="bar">Diagramme à barres</option>
+                                <option value="line">Courbe</option>
+                                <option value="scatter">Nuage de points</option>
+                                <option value="pie">Diagramme circulaire</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group" id="x-axis-container" style="display:none;">
+                            <label for="x-axis"><i class="fas fa-arrows-alt-h"></i> Axe X:</label>
+                            <select id="x-axis"></select>
+                        </div>
+                        
+                        <div class="option-group" id="y-axis-container" style="display:none;">
+                            <label for="y-axis"><i class="fas fa-arrows-alt-v"></i> Axe Y:</label>
+                            <select id="y-axis"></select>
+                        </div>
+                        
+                        <div class="option-group" id="color-theme-container" style="display:none;">
+                            <label for="color-theme"><i class="fas fa-palette"></i> Thème de couleur:</label>
+                            <div class="color-picker">
+                                <div class="color-option selected" data-theme="default" style="background-color:#3498db;"></div>
+                                <div class="color-option" data-theme="red" style="background-color:#e74c3c;"></div>
+                                <div class="color-option" data-theme="green" style="background-color:#2ecc71;"></div>
+                                <div class="color-option" data-theme="purple" style="background-color:#9b59b6;"></div>
+                                <div class="color-option" data-theme="orange" style="background-color:#e67e22;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="generate-visual" class="btn btn-tertiary" style="display:none;"><i class="fas fa-magic"></i> Générer la visualisation</button>
+                    
+                    <div id="visual-container" class="chart-container" style="display:none;"></div>
+                </div>
+            </div>
+            
+            <div id="threeD-tab" class="tab-content">
+                <div class="threeD-section">
+                    <div class="section-title">
+                        <i class="fas fa-cube"></i>
+                        <h3>Visualisation 3D des Forages</h3>
+                    </div>
+                    
+                    <div class="options-grid">
+                        <div class="option-group">
+                            <label for="3d-colorby"><i class="fas fa-fill-drip"></i> Coloration des forages par:</label>
+                            <select id="3d-colorby">
+                                <option value="default">Défaut (par forage)</option>
+                                <option value="depth">Profondeur</option>
+                                <option value="lithology">Lithologie</option>
+                                <option value="grade">Teneur</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group" id="3d-grade-container" style="display:none;">
+                            <label for="3d-grade-column"><i class="fas fa-percentage"></i> Colonne de teneur:</label>
+                            <select id="3d-grade-column"></select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="3d-exaggeration"><i class="fas fa-arrows-alt-v"></i> Exagération verticale: <span id="3d-exaggeration-value">2.0</span></label>
+                            <input type="range" id="3d-exaggeration" min="1" max="10" value="2" step="0.5">
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="3d-diameter"><i class="fas fa-circle"></i> Diamètre des forages: <span id="3d-diameter-value">2.0</span></label>
+                            <input type="range" id="3d-diameter" min="0.5" max="5" value="2" step="0.5">
+                        </div>
+                    </div>
+                    
+                    <button id="generate-3d" class="btn btn-quaternary"><i class="fas fa-cubes"></i> Générer le modèle 3D</button>
+                    
+                    <div id="canvas3d-container" style="display:none;">
+                        <canvas id="canvas3d"></canvas>
+                        <div class="controls3d">
+                            <button id="rotate-left"><i class="fas fa-arrow-left"></i></button>
+                            <button id="rotate-right"><i class="fas fa-arrow-right"></i></button>
+                            <button id="rotate-up"><i class="fas fa-arrow-up"></i></button>
+                            <button id="rotate-down"><i class="fas fa-arrow-down"></i></button>
+                            <button id="zoom-in"><i class="fas fa-plus"></i></button>
+                            <button id="zoom-out"><i class="fas fa-minus"></i></button>
+                            <button id="reset-view"><i class="fas fa-sync-alt"></i> Réinitialiser</button>
+                        </div>
+                        <div class="legend3d" id="legend3d"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ajout de Three.js pour la visualisation 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+
+    <script>
+        // Stockage des données importées
+        const importedData = {
+            collets: null,
+            deviations: null,
+            analyses: null,
+            lithologie: null
+        };
+        
+        // Variables globales pour les thèmes de couleur
+        const colorThemes = {
+            default: ['#3498db', '#2980b9', '#1abc9c', '#16a085'],
+            red: ['#e74c3c', '#c0392b', '#f39c12', '#d35400'],
+            green: ['#2ecc71', '#27ae60', '#a3e4d7', '#1abc9c'],
+            purple: ['#9b59b6', '#8e44ad', '#d2b4de', '#a569bd'],
+            orange: ['#e67e22', '#d35400', '#f5b041', '#f39c12']
+        };
+        let activeColorTheme = 'default';
+        
+        // Variables pour la visualisation 3D
+        let scene, camera, renderer, controls;
+        let drillholes = [];
+        
+        // Fonction pour parser les fichiers CSV
+        function parseCSV(file, callback) {
+            const reader = new FileReader();
+            reader.readAsText(file);
+            
+            reader.onload = function(event) {
+                const csv = event.target.result;
+                const lines = csv.split('\n');
+                const headers = lines[0].split(',');
+                
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = lines[i].split(',');
+                    const entry = {};
+                    
+                    for (let j = 0; j < headers.length; j++) {
+                        entry[headers[j].trim()] = values[j] ? values[j].trim() : '';
+                    }
+                    
+                    data.push(entry);
+                }
+                
+                callback({
+                    headers: headers.map(h => h.trim()),
+                    data: data
+                });
+            };
+            
+            reader.onerror = function() {
+                showMessage('Erreur lors de la lecture du fichier', 'error');
+            };
+        }
+        
+        // Fonction pour créer un tableau HTML à partir des données
+        function createTable(data) {
+            if (!data || !data.headers || !data.data || data.data.length === 0) {
+                return '<p>Aucune donnée disponible</p>';
+            }
+            
+            let table = '<table><thead><tr>';
+            
+            // En-têtes du tableau
+            data.headers.forEach(header => {
+                table += `<th>${header}</th>`;
+            });
+            
+            table += '</tr></thead><tbody>';
+            
+            // Limiter à 50 lignes pour la performance
+            const maxRows = Math.min(data.data.length, 50);
+            
+            // Lignes de données
+            for (let i = 0; i < maxRows; i++) {
+                table += '<tr>';
+                data.headers.forEach(header => {
+                    table += `<td>${data.data[i][header] || ''}</td>`;
+                });
+                table += '</tr>';
+            }
+            
+            table += '</tbody></table>';
+            
+            if (data.data.length > 50) {
+                table += `<p><em>Affichage limité à 50 lignes sur ${data.data.length} au total.</em></p>`;
+            }
+            
+            return table;
+        }
+        
+        // Fonction pour afficher des messages
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = text;
+            messageDiv.className = type;
+            
+            // Effacer le message après 5 secondes
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+                messageDiv.className = '';
+            }, 5000);
+        }
+        
+        // Analyse statistique des données
+        function analyzeData(dataSource, column, analysisType) {
+            const data = importedData[dataSource];
+            if (!data || !data.data || data.data.length === 0) {
+                showMessage(`Aucune donnée disponible pour ${dataSource}`, 'error');
+                return;
+            }
+            
+            // Extraire les valeurs numériques de la colonne sélectionnée
+            let values = data.data
+                .map(row => parseFloat(row[column]))
+                .filter(val => !isNaN(val));
+            
+            if (values.length === 0) {
+                showMessage(`Aucune valeur numérique trouvée dans la colonne ${column}`, 'error');
+                return;
+            }
+            
+            // Calcul des statistiques de base
+            const stats = calculateStatistics(values);
+            
+            // Afficher le résumé statistique
+            displayStatSummary(stats, column);
+            
+            // Générer le graphique approprié
+            if (analysisType === 'histogram') {
+                createHistogram(values, column, 'stats-chart-container');
+            } else if (analysisType === 'boxplot') {
+                createBoxPlot(stats, column, 'stats-chart-container');
+            } else if (analysisType === 'distribution') {
+                createDistributionChart(values, column, 'stats-chart-container');
+            }
+            
+            // Afficher le conteneur de graphique
+            document.getElementById('stats-chart-container').style.display = 'block';
+        }
+        
+        // Calcul des statistiques de base
+        function calculateStatistics(values) {
+            // Tri des valeurs pour les calculs
+            values.sort((a, b) => a - b);
+            
+            const count = values.length;
+            const sum = values.reduce((a, b) => a + b, 0);
+            const mean = sum / count;
+            
+            // Calcul de l'écart-type
+            const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
+            const variance = squaredDiffs.reduce((a, b) => a + b, 0) / count;
+            const stdDev = Math.sqrt(variance);
+            
+            // Calcul des quartiles
+            const q1Index = Math.floor(count * 0.25);
+            const q2Index = Math.floor(count * 0.5);
+            const q3Index = Math.floor(count * 0.75);
+            
+            return {
+                count: count,
+                min: values[0],
+                max: values[count - 1],
+                mean: mean,
+                median: count % 2 === 0 
+                    ? (values[q2Index - 1] + values[q2Index]) / 2 
+                    : values[q2Index],
+                q1: values[q1Index],
+                q3: values[q3Index],
+                stdDev: stdDev,
+                variance: variance,
+                sum: sum
+            };
+        }
+        
+        // Afficher le résumé statistique
+        function displayStatSummary(stats, column) {
+            const summaryDiv = document.getElementById('stats-summary');
+            summaryDiv.innerHTML = '';
+            
+            const metrics = [
+                { label: 'Nombre de valeurs', value: stats.count, icon: 'fa-hashtag' },
+                { label: 'Minimum', value: stats.min.toFixed(3), icon: 'fa-arrow-down' },
+                { label: 'Maximum', value: stats.max.toFixed(3), icon: 'fa-arrow-up' },
+                { label: 'Moyenne', value: stats.mean.toFixed(3), icon: 'fa-calculator' },
+                { label: 'Médiane', value: stats.median.toFixed(3), icon: 'fa-grip-lines' },
+                { label: 'Premier quartile (Q1)', value: stats.q1.toFixed(3), icon: 'fa-sort-amount-down' },
+                { label: 'Troisième quartile (Q3)', value: stats.q3.toFixed(3), icon: 'fa-sort-amount-up' },
+                { label: 'Écart-type', value: stats.stdDev.toFixed(3), icon: 'fa-chart-line' },
+                { label: 'Variance', value: stats.variance.toFixed(3), icon: 'fa-square-root-alt' },
+                { label: 'Somme', value: stats.sum.toFixed(3), icon: 'fa-plus' }
+            ];
+            
+            metrics.forEach(metric => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3><i class="fas ${metric.icon}"></i> ${metric.label}</h3>
+                    <p style="font-size: 1.5em; font-weight: bold;">${metric.value}</p>
+                `;
+                summaryDiv.appendChild(card);
+            });
+        }
+        
+        // Créer un histogramme
+        function createHistogram(values, column, containerId) {
+            const chartContainer = document.getElementById(containerId);
+            chartContainer.innerHTML = '';
+            
+            // Calculer les classes pour l'histogramme
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+            const binCount = Math.min(Math.ceil(Math.sqrt(values.length)), 20); // Règle de Sturges simplifiée
+            const binWidth = range / binCount;
+            
+            // Créer les bins
+            const bins = Array(binCount).fill(0);
+            values.forEach(value => {
+                const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            // Calculer la hauteur maximale pour la normalisation
+            const maxBinHeight = Math.max(...bins);
+            const scaleFactor = 200 / maxBinHeight; // 200px est la hauteur maximale des barres
+            
+            // Créer le conteneur SVG
+            const svgContainer = document.createElement('div');
+            svgContainer.style.width = '100%';
+            svgContainer.style.height = '300px';
+            svgContainer.style.position = 'relative';
+            
+            // Titre du graphique
+            const title = document.createElement('h3');
+            title.innerHTML = `<i class="fas fa-chart-bar"></i> Histogramme de la distribution: ${column}`;
+            title.style.textAlign = 'center';
+            chartContainer.appendChild(title);
+            
+            // Créer l'histogramme
+            let svgContent = `
+                <svg width="100%" height="250" style="overflow: visible;">
+                    <g transform="translate(40, 10)">
+            `;
+            
+            // Dessiner les barres
+            const barWidth = `calc((100% - 80px) / ${binCount})`;
+            bins.forEach((count, i) => {
+                const height = count * scaleFactor;
+                const x = `calc(${i} * ${barWidth})`;
+                const y = 200 - height;
+                
+                // Utiliser la couleur du thème actif
+                const color = colorThemes[activeColorTheme][i % colorThemes[activeColorTheme].length];
+                const darkerColor = colorThemes[activeColorTheme][(i + 1) % colorThemes[activeColorTheme].length];
+                
+                // Étiquette de classe
+                const binStart = (min + i * binWidth).toFixed(2);
+                const binEnd = (min + (i + 1) * binWidth).toFixed(2);
+                
+                svgContent += `
+                    <g class="bar">
+                        <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" 
+                              fill="${color}" stroke="${darkerColor}"></rect>
+                        <text x="calc(${x} + ${barWidth}/2)" y="220" text-anchor="middle" 
+                              style="font-size: 10px;">${binStart}</text>
+                    </g>
+                `;
+            });
+            
+            // Axe Y
+            svgContent += `
+                <line x1="0" y1="200" x2="0" y2="0" stroke="black"></line>
+                <text x="-30" y="100" text-anchor="middle" transform="rotate(-90, -30, 100)">Fréquence</text>
+            `;
+            
+            // Axe X
+            svgContent += `
+                <line x1="0" y1="200" x2="100%" y2="200" stroke="black"></line>
+                <text x="50%" y="240" text-anchor="middle">${column}</text>
+            `;
+            
+            svgContent += `
+                    </g>
+                </svg>
+            `;
+            
+            svgContainer.innerHTML = svgContent;
+            chartContainer.appendChild(svgContainer);
+        }
+        
+        // Créer un diagramme en boîte (boxplot)
+        function createBoxPlot(stats, column, containerId) {
+            const chartContainer = document.getElementById(containerId);
+            chartContainer.innerHTML = '';
+            
+            // Titre du graphique
+            const title = document.createElement('h3');
+            title.innerHTML = `<i class="fas fa-box"></i> Diagramme en boîte: ${column}`;
+            title.style.textAlign = 'center';
+            chartContainer.appendChild(title);
+            
+            // Créer le conteneur SVG
+            const svgContainer = document.createElement('div');
+            svgContainer.style.width = '100%';
+            svgContainer.style.height = '200px';
+            svgContainer.style.position = 'relative';
+            
+            // Normaliser les valeurs pour la visualisation
+            const min = stats.min;
+            const max = stats.max;
+            const range = max - min;
+            const padding = range * 0.1; // 10% de padding
+            
+            const normalizeValue = (value) => {
+                return (value - min + padding) / (range + 2 * padding) * 100;
+            };
+            
+            const normalizedMin = normalizeValue(stats.min);
+            const normalizedQ1 = normalizeValue(stats.q1);
+            const normalizedMedian = normalizeValue(stats.median);
+            const normalizedQ3 = normalizeValue(stats.q3);
+            const normalizedMax = normalizeValue(stats.max);
+            
+            // Utiliser les couleurs du thème actif
+            const boxColor = colorThemes[activeColorTheme][0];
+            const boxBorderColor = colorThemes[activeColorTheme][1];
+            
+            // Créer le boxplot
+            let svgContent = `
+                <svg width="100%" height="100" style="overflow: visible;">
+                    <g transform="translate(40, 50)">
+                        <!-- Ligne du min au max -->
+                        <line x1="${normalizedMin}%" y1="0" x2="${normalizedMax}%" y2="0" stroke="black" stroke-width="2"></line>
+                        
+                        <!-- Boîte Q1 à Q3 -->
+                        <rect x="${normalizedQ1}%" y="-20" width="${normalizedQ3 - normalizedQ1}%" height="40" 
+                              fill="${boxColor}" stroke="${boxBorderColor}" stroke-width="1"></rect>
+                        
+                        <!-- Ligne médiane -->
+                        <line x1="${normalizedMedian}%" y1="-20" x2="${normalizedMedian}%" y2="20" stroke="black" stroke-width="2"></line>
+                        
+                        <!-- Min et Max (whiskers) -->
+                        <line x1="${normalizedMin}%" y1="-10" x2="${normalizedMin}%" y2="10" stroke="black" stroke-width="2"></line>
+                        <line x1="${normalizedMax}%" y1="-10" x2="${normalizedMax}%" y2="10" stroke="black" stroke-width="2"></line>
+                        
+                        <!-- Étiquettes -->
+                        <text x="${normalizedMin}%" y="30" text-anchor="middle" style="font-size: 10px;">Min: ${stats.min.toFixed(2)}</text>
+                        <text x="${normalizedQ1}%" y="30" text-anchor="middle" style="font-size: 10px;">Q1: ${stats.q1.toFixed(2)}</text>
+                        <text x="${normalizedMedian}%" y="30" text-anchor="middle" style="font-size: 10px;">Med: ${stats.median.toFixed(2)}</text>
+                        <text x="${normalizedQ3}%" y="30" text-anchor="middle" style="font-size: 10px;">Q3: ${stats.q3.toFixed(2)}</text>
+                        <text x="${normalizedMax}%" y="30" text-anchor="middle" style="font-size: 10px;">Max: ${stats.max.toFixed(2)}</text>
+                    </g>
+                </svg>
+            `;
+            
+            svgContainer.innerHTML = svgContent;
+            chartContainer.appendChild(svgContainer);
+            
+            // Légende
+            const legend = document.createElement('div');
+            legend.innerHTML = `
+                <p style="text-align: center; margin-top: 70px;">
+                    <strong>Interprétation:</strong> La boîte représente l'intervalle interquartile (IQR), 
+                    de Q1 à Q3, contenant 50% des données. La ligne au milieu représente la médiane. 
+                    Les lignes extérieures (whiskers) s'étendent jusqu'aux valeurs minimales et maximales.
+                </p>
+            `;
+            chartContainer.appendChild(legend);
+        }
+        
+        // Créer un diagramme de distribution
+        function createDistributionChart(values, column, containerId) {
+            const chartContainer = document.getElementById(containerId);
+            chartContainer.innerHTML = '';
+            
+            // Titre du graphique
+            const title = document.createElement('h3');
+            title.innerHTML = `<i class="fas fa-stream"></i> Distribution des valeurs: ${column}`;
+            title.style.textAlign = 'center';
+            chartContainer.appendChild(title);
+            
+            // Calculer les classes pour la distribution
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+            const binCount = Math.min(Math.ceil(Math.sqrt(values.length)), 20);
+            const binWidth = range / binCount;
+            
+            // Créer les bins
+            const bins = Array(binCount).fill(0);
+            values.forEach(value => {
+                const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            // Convertir en pourcentage cumulatif
+            let cumulative = 0;
+            const cumulativeBins = bins.map(count => {
+                cumulative += count;
+                return cumulative;
+            });
+            
+            // Normaliser
+            const maxCumulative = cumulativeBins[cumulativeBins.length - 1];
+            const normalizedCumulative = cumulativeBins.map(val => (val / maxCumulative) * 100);
+            
+            // Calculer la hauteur maximale pour la normalisation
+            const maxBinHeight = Math.max(...bins);
+            const scaleFactor = 150 / maxBinHeight;
+            
+            // Utiliser les couleurs du thème actif
+            const barColor = colorThemes[activeColorTheme][0];
+            const barBorderColor = colorThemes[activeColorTheme][1];
+            const lineColor = colorThemes[activeColorTheme][2];
+            const pointColor = colorThemes[activeColorTheme][3];
+            
+            // Créer le conteneur SVG
+            const svgContainer = document.createElement('div');
+            svgContainer.style.width = '100%';
+            svgContainer.style.height = '250px';
+            svgContainer.style.position = 'relative';
+            
+            // Créer le graphique
+            let svgContent = `
+                <svg width="100%" height="200" style="overflow: visible;">
+                    <g transform="translate(40, 10)">
+            `;
+            
+            // Dessiner les barres
+            const barWidth = `calc((100% - 80px) / ${binCount})`;
+            bins.forEach((count, i) => {
+                const height = count * scaleFactor;
+                const x = `calc(${i} * ${barWidth})`;
+                const y = 150 - height;
+                
+                svgContent += `
+                    <rect x="${x}" y="${y}" width="${barWidth}" height="${height}" 
+                          fill="${barColor}" stroke="${barBorderColor}" opacity="0.7"></rect>
+                `;
+            });
+            
+            // Dessiner la courbe cumulative
+            svgContent += `<path d="M0,150 `;
+            
+            normalizedCumulative.forEach((val, i) => {
+                const x = `calc(${i} * ${barWidth} + ${barWidth}/2)`;
+                const y = 150 - val * 1.5;
+                svgContent += `L ${x},${y} `;
+            });
+            
+            svgContent += `" fill="none" stroke="${lineColor}" stroke-width="2"></path>`;
+            
+            // Points sur la courbe cumulative
+            normalizedCumulative.forEach((val, i) => {
+                const x = `calc(${i} * ${barWidth} + ${barWidth}/2)`;
+                const y = 150 - val * 1.5;
+                svgContent += `
+                    <circle cx="${x}" cy="${y}" r="3" fill="${pointColor}"></circle>
+                `;
+            });
+            
+            // Axe Y gauche (fréquence)
+            svgContent += `
+                <line x1="0" y1="150" x2="0" y2="0" stroke="black"></line>
+                <text x="-30" y="75" text-anchor="middle" transform="rotate(-90, -30, 75)">Fréquence</text>
+            `;
+            
+            // Axe Y droit (pourcentage cumulatif)
+            svgContent += `
+                <line x1="100%" y1="150" x2="100%" y2="0" stroke="black"></line>
+                <text x="calc(100% + 30px)" y="75" text-anchor="middle" transform="rotate(-90, calc(100% + 30px), 75)">% Cumulatif</text>
+            `;
+            
+            // Axe X
+            svgContent += `
+                <line x1="0" y1="150" x2="100%" y2="150" stroke="black"></line>
+                <text x="50%" y="180" text-anchor="middle">${column}</text>
+            `;
+            
+            svgContent += `
+                    </g>
+                </svg>
+            `;
+            
+            svgContainer.innerHTML = svgContent;
+            chartContainer.appendChild(svgContainer);
+            
+            // Légende
+            const legend = document.createElement('div');
+            legend.innerHTML = `
+                <div style="display: flex; justify-content: center; margin-top: 20px;">
+                    <div style="margin-right: 20px;">
+                        <span style="display: inline-block; width: 15px; height: 15px; background-color: ${barColor}; margin-right: 5px;"></span>
+                        Fréquence
+                    </div>
+                    <div>
+                        <span style="display: inline-block; width: 15px; height: 15px; background-color: ${pointColor}; margin-right: 5px; border-radius: 50%;"></span>
+                        Distribution cumulative (%)
+                    </div>
+                </div>
+            `;
+            chartContainer.appendChild(legend);
+        }
+        
+        // Créer un diagramme à barres
+        function createBarChart(dataSource, xColumn, yColumn) {
+            const data = importedData[dataSource];
+            if (!data || !data.data || data.data.length === 0) {
+                showMessage(`Aucune donnée disponible pour ${dataSource}`, 'error');
+                return;
+            }
+            
+            // Extraire les données pour le graphique
+            const chartData = [];
+            
+            // Limiter à 20 éléments pour la lisibilité
+            const maxItems = Math.min(data.data.length, 20);
+            
+            for (let i = 0; i < maxItems; i++) {
+                const xValue = data.data[i][xColumn] || '';
+                const yValue = parseFloat(data.data[i][yColumn]) || 0;
+                
+                chartData.push({
+                    x: xValue,
+                    y: yValue
+                });
+            }
+            
+            // Trier par valeur Y décroissante
+            chartData.sort((a, b) => b.y - a
